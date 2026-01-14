@@ -27,6 +27,7 @@ export const userTemperatureProfile = createTable("userTemperatureProfiles", {
   initialSleepLevel: integer("initialSleepLevel").notNull(),
   midStageSleepLevel: integer("midStageSleepLevel").notNull(),
   finalSleepLevel: integer("finalSleepLevel").notNull(),
+  customStages: text("customStages"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   timezoneTZ: varchar("timezone", { length: 50 }).notNull(),
