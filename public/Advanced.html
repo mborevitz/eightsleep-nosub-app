@@ -208,3 +208,235 @@
             color: #2c5282;
             border: 1px solid #90cdf4;
         }
+        
+        .warning {
+            background: #fef5e7;
+            border: 1px solid #f9e79f;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #7d6608;
+        }
+        
+        .info-box {
+            background: #ebf8ff;
+            border: 1px solid #90cdf4;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #2c5282;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛏️ Eight Sleep Advanced Controller</h1>
+        <p class="subtitle">Full control over your temperature schedule</p>
+
+        <div class="warning">
+            ⚠️ This saves your settings to the database. Make sure you've created a profile in the main app first.
+        </div>
+        
+        <div class="section">
+            <h2>Your Eight Sleep Email</h2>
+            <label for="email">Email (must match your profile)</label>
+            <input type="email" id="email" placeholder="your@email.com">
+        </div>
+        
+        <div class="section">
+            <h2>Sleep Schedule</h2>
+            
+            <div class="time-inputs">
+                <div>
+                    <label for="bedTime">Bed Time</label>
+                    <input type="time" id="bedTime" value="22:00">
+                </div>
+                <div>
+                    <label for="wakeTime">Wake Time</label>
+                    <input type="time" id="wakeTime" value="06:00">
+                </div>
+            </div>
+            
+            <label for="side">Your Side of Bed</label>
+            <select id="side">
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+            </select>
+        </div>
+        
+        <div class="section">
+            <h2>Temperature Stages</h2>
+            
+            <div class="info-box">
+                💡 Create as many temperature stages as you want! Each stage starts at a specific time and sets your mattress to that temperature. Times should be between your bed time and wake time.
+            </div>
+            
+            <div id="stagesContainer"></div>
+            
+            <button class="add-stage-btn" onclick="addStage()">+ Add Temperature Stage</button>
+        </div>
+        
+        <div class="section">
+            <h2>Save Settings</h2>
+            <button onclick="saveSchedule()">💾 Save Schedule to Database</button>
+        </div>
+        
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        let stages = [];
+        
+        // Load saved data from localStorage
+        window.onload = function() {
+            const saved = localStorage.getItem('eightSleepAdvancedData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('bedTime').value = data.bedTime || '22:00';
+                document.getElementById('wakeTime').value = data.wakeTime || '06:00';
+                document.getElementById('side').value = data.side || 'left';
+                stages = data.stages || getDefaultStages();
+            } else {
+                stages = getDefaultStages();
+            }
+            
+            renderStages();
+        };
+        
+        function getDefaultStages() {
+            return [
+                { time: '22:00', temp: -3, name: 'Initial Sleep' },
+                { time: '23:00', temp: -4, name: 'Mid Sleep' },
+                { time: '04:00', temp: -2, name: 'Final Sleep' }
+            ];
+        }
+        
+        function renderStages() {
+            const container = document.getElementById('stagesContainer');
+            container.innerHTML = '';
+            
+            stages.forEach((stage, index) => {
+                const stageDiv = document.createElement('div');
+                stageDiv.className = 'stage-card';
+                stageDiv.innerHTML = `
+                    <div class="stage-header">
+                        <input type="text" class="stage-title" value="${stage.name}" 
+                               onchange="updateStageName(${index}, this.value)" 
+                               placeholder="Stage name"
+                               style="border: none; background: transparent; font-weight: 600; font-size: 16px; width: 70%; padding: 0;">
+                        ${stages.length > 1 ? `<button class="remove-stage" onclick="removeStage(${index})">Remove</button>` : ''}
+                    </div>
+                    
+                    <div class="stage-time-input">
+                        <label>Start Time</label>
+                        <input type="time" value="${stage.time}" onchange="updateStageTime(${index}, this.value)">
+                    </div>
+                    
+                    <label>Temperature Level</label>
+                    <input type="range" class="temp-slider" min="-10" max="10" value="${stage.temp}" 
+                           oninput="updateStageTemp(${index}, this.value)">
+                    <div class="temp-value" id="tempValue${index}">${stage.temp}</div>
+                    <div class="temp-label">Cooler ← → Warmer</div>
+                `;
+                container.appendChild(stageDiv);
+            });
+        }
+        
+        function addStage() {
+            const lastStage = stages[stages.length - 1];
+            const lastTime = lastStage.time.split(':');
+            let newHour = parseInt(lastTime[0]) + 1;
+            if (newHour >= 24) newHour = 0;
+            const newTime = `${newHour.toString().padStart(2, '0')}:00`;
+            
+            stages.push({
+                time: newTime,
+                temp: 0,
+                name: `Stage ${stages.length + 1}`
+            });
+            
+            renderStages();
+        }
+        
+        function removeStage(index) {
+            if (stages.length > 1) {
+                stages.splice(index, 1);
+                renderStages();
+            }
+        }
+        
+        function updateStageName(index, name) {
+            stages[index].name = name;
+        }
+        
+        function updateStageTime(index, time) {
+            stages[index].time = time;
+        }
+        
+        function updateStageTemp(index, temp) {
+            stages[index].temp = parseInt(temp);
+            document.getElementById(`tempValue${index}`).textContent = temp;
+        }
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+        
+        async function saveSchedule() {
+            const email = document.getElementById('email').value;
+            const bedTime = document.getElementById('bedTime').value;
+            const wakeTime = document.getElementById('wakeTime').value;
+            const side = document.getElementById('side').value;
+            
+            if (!email) {
+                showStatus('Please enter your email', 'error');
+                return;
+            }
+            
+            const data = {
+                email: email,
+                bedTime: bedTime,
+                wakeTime: wakeTime,
+                side: side,
+                stages: stages
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('eightSleepAdvancedData', JSON.stringify(data));
+            
+            // Save to database
+            showStatus('Saving to database...', 'info');
+            
+            try {
+                const response = await fetch('/api/saveStages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('✓ Schedule saved successfully! Your cron job will use these settings.', 'success');
+                } else {
+                    showStatus('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Failed to save: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
