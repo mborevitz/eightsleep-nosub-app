@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eight Sleep Advanced Controller</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+    
+    .container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    h1 {
+        color: #1a202c;
+        margin-bottom: 8px;
+        font-size: 28px;
+    }
+    
+    .subtitle {
+        color: #718096;
+        margin-bottom: 24px;
+        font-size: 14px;
+    }
+    
+    .section {
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    
+    h2 {
+        color: #2d3748;
+        margin-bottom: 16px;
+        font-size: 18px;
+    }
+    
+    label {
+        display: block;
+        color: #4a5568;
+        margin-bottom: 6px;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    
+    input, select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        margin-bottom: 16px;
+        transition: border-color 0.2s;
+    }
+    
+    input:focus, select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .time-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    
+    .stage-card {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+        position: relative;
+    }
+    
+    .stage-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    
+    .stage-title {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 16px;
+    }
+    
+    .remove-stage {
+        background: #fc8181;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .remove-stage:hover {
+        background: #f56565;
+    }
+    
+    .stage-time-input {
+        margin-bottom: 12px;
+    }
+    
+    .temp-slider {
+        width: 100%;
+        margin: 12px 0;
+    }
+    
+    .temp-value {
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: #667eea;
+        margin-top: 8px;
+    }
+    
+    .temp-label {
+        font-size: 12px;
+        color: #718096;
+        margin-top: 4px;
+        text-align: center;
+    }
+    
+    button {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-bottom: 12px;
+    }
+    
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    button:active {
+        transform: translateY(0);
+    }
+    
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .add-stage-btn {
+        background: #48bb78;
+    }
+    
+    .add-stage-btn:hover {
+        box-shadow: 0 8px 20px rgba(72, 187, 120, 0.4);
+    }
+    
+    .status {
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 16px;
+        font-size: 14px;
+        display: none;
+    }
+    
+    .status.success {
+        background: #c6f6d5;
+        color: #22543d;
+        border: 1px solid #9ae6b4;
+    }
+    
+    .status.error {
+        background: #fed7d7;
+        color: #742a2a;
+        border: 1px solid #fc8181;
+    }
+    
+    .status.info {
+        background: #bee3f8;
+        color: #2c5282;
+        border: 1px solid #90cdf4;
+    }
+    
+    .logged-in-info {
+        background: #f7fafc;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        display: none;
+    }
+    
+    .logged-in-info.show {
+        display: block;
+    }
+    
+    .warning {
+        background: #fef5e7;
+        border: 1px solid #f9e79f;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 13px;
+        color: #7d6608;
+    }
+    
+    .info-box {
+        background: #ebf8ff;
+        border: 1px solid #90cdf4;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 13px;
+        color: #2c5282;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <h1>🛏️ Eight Sleep Advanced Controller</h1>
+        <p class="subtitle">Full control over your temperature schedule</p>
+
+```
+    <div class="warning">
+        ⚠️ This uses unofficial API methods. Your credentials are stored locally and sent only to Eight Sleep's servers.
+    </div>
+    
+    <div class="section">
+        <h2>Login to Eight Sleep</h2>
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="your@email.com">
+        
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Your Eight Sleep password">
+        
+        <button onclick="login()">Login</button>
+        
+        <div class="logged-in-info" id="loggedInInfo">
+            ✓ Logged in successfully!
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Sleep Schedule</h2>
+        
+        <div class="time-inputs">
+            <div>
+                <label for="bedTime">Bed Time</label>
+                <input type="time" id="bedTime" value="22:00">
+            </div>
+            <div>
+                <label for="wakeTime">Wake Time</label>
+                <input type="time" id="wakeTime" value="06:00">
+            </div>
+        </div>
+        
+        <label for="side">Your Side of Bed</label>
+        <select id="side">
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+        </select>
+    </div>
+    
+    <div class="section">
+        <h2>Temperature Stages</h2>
+        
+        <div class="info-box">
+            💡 Create as many temperature stages as you want! Each stage starts at a specific time and sets your mattress to that temperature. Times should be between your bed time and wake time.
+        </div>
+        
+        <div id="stagesContainer"></div>
+        
+        <button class="add-stage-btn" onclick="addStage()">+ Add Temperature Stage</button>
+    </div>
+    
+    <div class="section">
+        <h2>Control</h2>
+        <button onclick="saveSchedule()">💾 Save Schedule</button>
+        <button onclick="testCurrent()">🧪 Test Current Temperature</button>
+    </div>
+    
+    <div class="status" id="status"></div>
+</div>
+
+<script>
+    let authToken = null;
+    let userId = null;
+    let deviceId = null;
+    let stages = [];
+    
+    // Load saved data
+    window.onload = function() {
+        const saved = localStorage.getItem('eightSleepAdvancedData');
+        if (saved) {
+            const data = JSON.parse(saved);
+            document.getElementById('email').value = data.email || '';
+            document.getElementById('bedTime').value = data.bedTime || '22:00';
+            document.getElementById('wakeTime').value = data.wakeTime || '06:00';
+            document.getElementById('side').value = data.side || 'left';
+            
+            stages = data.stages || getDefaultStages();
+            
+            if (data.authToken) {
+                authToken = data.authToken;
+                userId = data.userId;
+                deviceId = data.deviceId;
+                document.getElementById('loggedInInfo').classList.add('show');
+            }
+        } else {
+            stages = getDefaultStages();
+        }
+        
+        renderStages();
+    };
+    
+    function getDefaultStages() {
+        return [
+            { time: '22:00', temp: -3, name: 'Initial Sleep' },
+            { time: '23:00', temp: -4, name: 'Mid Sleep' },
+            { time: '04:00', temp: -4, name: 'Final Sleep' }
+        ];
+    }
+    
+    function renderStages() {
+        const container = document.getElementById('stagesContainer');
+        container.innerHTML = '';
+        
+        stages.forEach((stage, index) => {
+            const stageDiv = document.createElement('div');
+            stageDiv.className = 'stage-card';
+            stageDiv.innerHTML = `
+                <div class="stage-header">
+                    <input type="text" class="stage-title" value="${stage.name}" 
+                           onchange="updateStageName(${index}, this.value)" 
+                           placeholder="Stage name"
+                           style="border: none; background: transparent; font-weight: 600; font-size: 16px; width: 70%; padding: 0;">
+                    ${stages.length > 1 ? `<button class="remove-stage" onclick="removeStage(${index})">Remove</button>` : ''}
+                </div>
+                
+                <div class="stage-time-input">
+                    <label>Start Time</label>
+                    <input type="time" value="${stage.time}" onchange="updateStageTime(${index}, this.value)">
+                </div>
+                
+                <label>Temperature Level</label>
+                <input type="range" class="temp-slider" min="-10" max="10" value="${stage.temp}" 
+                       oninput="updateStageTemp(${index}, this.value)">
+                <div class="temp-value" id="tempValue${index}">${stage.temp}</div>
+                <div class="temp-label">Cooler ← → Warmer</div>
+            `;
+            container.appendChild(stageDiv);
+        });
+    }
+    
+    function addStage() {
+        const lastStage = stages[stages.length - 1];
+        const lastTime = lastStage.time.split(':');
+        let newHour = parseInt(lastTime[0]) + 1;
+        if (newHour >= 24) newHour = 0;
+        const newTime = `${newHour.toString().padStart(2, '0')}:00`;
+        
+        stages.push({
+            time: newTime,
+            temp: 0,
+            name: `Stage ${stages.length + 1}`
+        });
+        
+        renderStages();
+    }
+    
+    function removeStage(index) {
+        if (stages.length > 1) {
+            stages.splice(index, 1);
+            renderStages();
+        }
+    }
+    
+    function updateStageName(index, name) {
+        stages[index].name = name;
+    }
+    
+    function updateStageTime(index, time) {
+        stages[index].time = time;
+    }
+    
+    function updateStageTemp(index, temp) {
+        stages[index].temp = parseInt(temp);
+        document.getElementById(`tempValue${index}`).textContent = temp;
+    }
+    
+    function showStatus(message, type) {
+        const status = document.getElementById('status');
+        status.textContent = message;
+        status.className = 'status ' + type;
+        status.style.display = 'block';
+        
+        setTimeout(() => {
+            status.style.display = 'none';
+        }, 5000);
+    }
+    
+    async function login() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        if (!email || !password) {
+            showStatus('Please enter email and password', 'error');
+            return;
+        }
+        
+        showStatus('Logging in...', 'info');
+        
+        try {
+            const response = await fetch('https://client-api.8slp.net/v1/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Eight Sleep/1.0'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Login failed. Check your credentials.');
+            }
+            
+            const data = await response.json();
+            authToken = data.session.token;
+            userId = data.session.userId;
+            
+            const userResponse = await fetch(`https://client-api.8slp.net/v1/users/${userId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Eight Sleep/1.0',
+                    'Session-Token': authToken
+                }
+            });
+            
+            const userData = await userResponse.json();
+            deviceId = userData.user.devices[0].id;
+            
+            document.getElementById('loggedInInfo').classList.add('show');
+            showStatus('Login successful!', 'success');
+            
+            saveSchedule();
+            
+        } catch (error) {
+            showStatus('Login failed: ' + error.message, 'error');
+        }
+    }
+    
+    function timeToMinutes(timeStr) {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+    }
+    
+    function getCurrentTemp() {
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        
+        const bedMinutes = timeToMinutes(document.getElementById('bedTime').value);
+        const wakeMinutes = timeToMinutes(document.getElementById('wakeTime').value);
+        
+        let adjustedCurrent = currentMinutes;
+        let adjustedWake = wakeMinutes;
+        
+        if (wakeMinutes < bedMinutes) {
+            adjustedWake += 24 * 60;
+        }
+        
+        if (currentMinutes < bedMinutes && currentMinutes < wakeMinutes) {
+            adjustedCurrent += 24 * 60;
+        }
+        
+        if (adjustedCurrent < bedMinutes || adjustedCurrent >= adjustedWake) {
+            return null;
+        }
+        
+        const sortedStages = [...stages].sort((a, b) => {
+            let aMin = timeToMinutes(a.time);
+            let bMin = timeToMinutes(b.time);
+            
+            if (aMin < bedMinutes) aMin += 24 * 60;
+            if (bMin < bedMinutes) bMin += 24 * 60;
+            
+            return aMin - bMin;
+        });
+        
+        let activeTemp = sortedStages[0].temp;
+        
+        for (const stage of sortedStages) {
+            let stageMin = timeToMinutes(stage.time);
+            if (stageMin < bedMinutes) stageMin += 24 * 60;
+            
+            if (adjustedCurrent >= stageMin) {
+                activeTemp = stage.temp;
+            } else {
+                break;
+            }
+        }
+        
+        return activeTemp;
+    }
+    
+    async function setTemperature(temp) {
+        if (!authToken || !userId || !deviceId) {
+            showStatus('Please login first', 'error');
+            return false;
+        }
+        
+        const side = document.getElementById('side').value;
+        
+        try {
+            const response = await fetch(`https://client-api.8slp.net/v1/devices/${deviceId}/temperature`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Eight Sleep/1.0',
+                    'Session-Token': authToken
+                },
+                body: JSON.stringify({
+                    [side]: {
+                        targetTemperature: temp,
+                        active: true
+                    }
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to set temperature');
+            }
+            
+            return true;
+        } catch (error) {
+            showStatus('Error setting temperature: ' + error.message, 'error');
+            return false;
+        }
+    }
+    
+    async function testCurrent() {
+        const temp = getCurrentTemp();
+        
+        if (temp === null) {
+            showStatus('Outside of sleep schedule. Testing with first stage temperature.', 'info');
+            const testTemp = stages[0].temp;
+            const success = await setTemperature(testTemp);
+            if (success) {
+                showStatus(`✓ Test: Temperature set to ${testTemp}`, 'success');
+            }
+            return;
+        }
+        
+        showStatus(`Testing... Setting temperature to ${temp}`, 'info');
+        
+        const success = await setTemperature(temp);
+        if (success) {
+            showStatus(`✓ Temperature set to ${temp} successfully!`, 'success');
+        }
+    }
+    
+    function saveSchedule() {
+        const data = {
+            email: document.getElementById('email').value,
+            bedTime: document.getElementById('bedTime').value,
+            wakeTime: document.getElementById('wakeTime').value,
+            side: document.getElementById('side').value,
+            stages: stages,
+            authToken: authToken,
+            userId: userId,
+            deviceId: deviceId
+        };
+        
+        localStorage.setItem('eightSleepAdvancedData', JSON.stringify(data));
+        showStatus('Schedule saved!', 'success');
+    }
+</script>
+```
+
+</body>
+</html>
