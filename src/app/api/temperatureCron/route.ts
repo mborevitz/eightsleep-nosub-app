@@ -9,6 +9,12 @@ import { getCurrentHeatingStatus } from "~/server/eight/user";
 
 export const runtime = "nodejs";
 
+interface TemperatureStage {
+  time: string;
+  temp: number;
+  name: string;
+}
+
 function createDateWithTime(baseDate: Date, timeString: string): Date {
   const [hours, minutes] = timeString.split(':').map(Number);
   if (hours === undefined || minutes === undefined || isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
@@ -23,6 +29,11 @@ function addDays(date: Date, days: number): Date {
   const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
+}
+
+function timeToMinutes(timeStr: string): number {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return (hours ?? 0) * 60 + (minutes ?? 0);
 }
 
 function isWithinTimeRange(current: Date, target: Date, rangeMinutes: number): boolean {
@@ -42,46 +53,59 @@ async function retryApiCall<T>(apiCall: () => Promise<T>, retries = 3): Promise<
   throw new Error("This should never happen due to the for loop, but TypeScript doesn't know that");
 }
 
-interface SleepCycle {
-  preHeatingTime: Date;
-  bedTime: Date;
-  midStageTime: Date;
-  finalStageTime: Date;
-  wakeupTime: Date;
-}
-
-function createSleepCycle(baseDate: Date, bedTimeStr: string, wakeupTimeStr: string): SleepCycle {
-  const preHeatingTime = createDateWithTime(baseDate, bedTimeStr);
-  preHeatingTime.setHours(preHeatingTime.getHours() - 1); // Set pre-heating to 1 hour before bedtime
+function getCurrentTempForStages(
+  bedTimeStr: string,
+  wakeTimeStr: string,
+  stages: TemperatureStage[],
+  currentTime: Date
+): number | null {
+  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+  const bedMinutes = timeToMinutes(bedTimeStr);
+  const wakeMinutes = timeToMinutes(wakeTimeStr);
   
-  const bedTime = createDateWithTime(baseDate, bedTimeStr);
-  let wakeupTime = createDateWithTime(baseDate, wakeupTimeStr);
+  let adjustedCurrent = currentMinutes;
+  let adjustedWake = wakeMinutes;
   
-  // Adjust wakeupTime if it's before bedTime (i.e., it's on the next day)
-  if (wakeupTime <= bedTime) {
-    wakeupTime = addDays(wakeupTime, 1);
+  // Handle overnight schedules
+  if (wakeMinutes < bedMinutes) {
+    adjustedWake += 24 * 60;
   }
   
-  const midStageTime = new Date(bedTime.getTime() + 60 * 60 * 1000);
-  const finalStageTime = new Date(wakeupTime.getTime() - 2 * 60 * 60 * 1000);
-  
-  return { preHeatingTime, bedTime, midStageTime, finalStageTime, wakeupTime };
-}
-
-function adjustTimeToCurrentCycle(cycleStart: Date, currentTime: Date, timeInCycle: Date): Date {
-  let adjustedTime = new Date(timeInCycle);
-  
-  // If the time in the cycle is before the cycle start, it means it's on the next day
-  if (timeInCycle < cycleStart) {
-    adjustedTime = addDays(adjustedTime, 1);
+  if (currentMinutes < bedMinutes && currentMinutes < wakeMinutes) {
+    adjustedCurrent += 24 * 60;
   }
   
-  // If the adjusted time is in the future relative to the current time, move it back by one day
-  if (adjustedTime > currentTime && adjustedTime.getTime() - currentTime.getTime() > 12 * 60 * 60 * 1000) {
-    adjustedTime = addDays(adjustedTime, -1);
+  // Check if we're in the sleep schedule
+  if (adjustedCurrent < bedMinutes || adjustedCurrent >= adjustedWake) {
+    return null; // Outside sleep schedule
   }
   
-  return adjustedTime;
+  // Sort stages by time
+  const sortedStages = [...stages].sort((a, b) => {
+    let aMin = timeToMinutes(a.time);
+    let bMin = timeToMinutes(b.time);
+    
+    if (aMin < bedMinutes) aMin += 24 * 60;
+    if (bMin < bedMinutes) bMin += 24 * 60;
+    
+    return aMin - bMin;
+  });
+  
+  // Find active temperature
+  let activeTemp = sortedStages[0]?.temp ?? 0;
+  
+  for (const stage of sortedStages) {
+    let stageMin = timeToMinutes(stage.time);
+    if (stageMin < bedMinutes) stageMin += 24 * 60;
+    
+    if (adjustedCurrent >= stageMin) {
+      activeTemp = stage.temp;
+    } else {
+      break;
+    }
+  }
+  
+  return activeTemp;
 }
 
 interface TestMode {
@@ -122,25 +146,42 @@ export async function adjustTemperature(testMode?: TestMode): Promise<void> {
             .where(eq(users.email, profile.users.email));
         }
 
-        const userTemperatureProfile = profile.userTemperatureProfiles;
-        const userNow = new Date(now.toLocaleString("en-US", { timeZone: userTemperatureProfile.timezoneTZ }));
+        const userProfile = profile.userTemperatureProfiles;
+        const userNow = new Date(now.toLocaleString("en-US", { timeZone: userProfile.timezoneTZ }));
 
-        // Create the sleep cycle based on the user's bed time and wake-up time
-        const sleepCycle = createSleepCycle(userNow, userTemperatureProfile.bedTime, userTemperatureProfile.wakeupTime);
+        // Parse custom stages if available, otherwise fall back to 3-stage system
+        let stages: TemperatureStage[];
+        if (userProfile.customStages && userProfile.customStages.trim() !== '') {
+          try {
+            stages = JSON.parse(userProfile.customStages) as TemperatureStage[];
+          } catch (e) {
+            console.log(`Failed to parse custom stages for ${profile.users.email}, falling back to 3-stage system`);
+            // Fall back to 3-stage system
+            stages = [
+              { time: userProfile.bedTime, temp: userProfile.initialSleepLevel, name: 'Initial Sleep' },
+              { time: addHoursToTime(userProfile.bedTime, 1), temp: userProfile.midStageSleepLevel, name: 'Mid Sleep' },
+              { time: subtractHoursFromTime(userProfile.wakeupTime, 2), temp: userProfile.finalSleepLevel, name: 'Final Sleep' }
+            ];
+          }
+        } else {
+          // Use 3-stage system
+          stages = [
+            { time: userProfile.bedTime, temp: userProfile.initialSleepLevel, name: 'Initial Sleep' },
+            { time: addHoursToTime(userProfile.bedTime, 1), temp: userProfile.midStageSleepLevel, name: 'Mid Sleep' },
+            { time: subtractHoursFromTime(userProfile.wakeupTime, 2), temp: userProfile.finalSleepLevel, name: 'Final Sleep' }
+          ];
+        }
 
-        // Adjust all times in the cycle to the current day
-        const cycleStart = sleepCycle.preHeatingTime;
-        const adjustedCycle: SleepCycle = {
-          preHeatingTime: adjustTimeToCurrentCycle(cycleStart, userNow, sleepCycle.preHeatingTime),
-          bedTime: adjustTimeToCurrentCycle(cycleStart, userNow, sleepCycle.bedTime),
-          midStageTime: adjustTimeToCurrentCycle(cycleStart, userNow, sleepCycle.midStageTime),
-          finalStageTime: adjustTimeToCurrentCycle(cycleStart, userNow, sleepCycle.finalStageTime),
-          wakeupTime: adjustTimeToCurrentCycle(cycleStart, userNow, sleepCycle.wakeupTime),
-        };
+        const currentTemp = getCurrentTempForStages(
+          userProfile.bedTime,
+          userProfile.wakeupTime,
+          stages,
+          userNow
+        );
 
         let heatingStatus;
         if (testMode?.enabled) {
-          heatingStatus = { isHeating: false, heatingLevel: 0 }; // Mock heating status for test mode
+          heatingStatus = { isHeating: false, heatingLevel: 0 };
           console.log(`[TEST MODE] Current time set to: ${userNow.toISOString()}`);
         } else {
           heatingStatus = await retryApiCall(() => getCurrentHeatingStatus(token));
@@ -148,79 +189,42 @@ export async function adjustTemperature(testMode?: TestMode): Promise<void> {
 
         console.log(`Current heating status for user ${profile.users.email}:`, JSON.stringify(heatingStatus));
         console.log(`User's current time: ${userNow.toISOString()} for user ${profile.users.email}`);
-        console.log(`Adjusted times for user ${profile.users.email}:`);
-        console.log(`Pre-heating: ${adjustedCycle.preHeatingTime.toISOString()}`);
-        console.log(`Bed time: ${adjustedCycle.bedTime.toISOString()}`);
-        console.log(`Mid stage: ${adjustedCycle.midStageTime.toISOString()}`);
-        console.log(`Final stage: ${adjustedCycle.finalStageTime.toISOString()}`);
-        console.log(`Wake-up: ${adjustedCycle.wakeupTime.toISOString()}`);
+        console.log(`Active stages for user ${profile.users.email}:`, JSON.stringify(stages));
 
-        const isNearPreHeating = isWithinTimeRange(userNow, adjustedCycle.preHeatingTime, 15);
-        const isNearBedTime = isWithinTimeRange(userNow, adjustedCycle.bedTime, 15);
-        const isNearMidStage = isWithinTimeRange(userNow, adjustedCycle.midStageTime, 15);
-        const isNearFinalStage = isWithinTimeRange(userNow, adjustedCycle.finalStageTime, 15);
-        const isNearWakeup = isWithinTimeRange(userNow, adjustedCycle.wakeupTime, 15);
-
-        // Determine current sleep stage
-        let currentSleepStage = "outside sleep cycle";
-        if (userNow >= adjustedCycle.preHeatingTime && userNow < adjustedCycle.bedTime) {
-          currentSleepStage = "pre-heating";
-        } else if (userNow >= adjustedCycle.bedTime && userNow < adjustedCycle.midStageTime) {
-          currentSleepStage = "initial";
-        } else if (userNow >= adjustedCycle.midStageTime && userNow < adjustedCycle.finalStageTime) {
-          currentSleepStage = "mid";
-        } else if (userNow >= adjustedCycle.finalStageTime && userNow < adjustedCycle.wakeupTime) {
-          currentSleepStage = "final";
+        if (currentTemp === null) {
+          console.log(`User ${profile.users.email} is outside sleep schedule`);
+          // Turn off heating if it's on and we're outside the schedule
+          if (heatingStatus.isHeating) {
+            if (testMode?.enabled) {
+              console.log(`[TEST MODE] Would turn off heating for user ${profile.users.email}`);
+            } else {
+              await retryApiCall(() => turnOffSide(token, profile.users.eightUserId));
+              console.log(`Heating turned off for user ${profile.users.email}`);
+            }
+          }
+          continue;
         }
 
-        console.log(`Current sleep stage for user ${profile.users.email}: ${currentSleepStage}`);
+        console.log(`Target temperature for user ${profile.users.email}: ${currentTemp}`);
 
-        if (isNearPreHeating || isNearBedTime || isNearMidStage || isNearFinalStage || isNearWakeup) {
-          let targetLevel: number;
-          let sleepStage: string;
-
-          if (isNearPreHeating || (isNearBedTime && userNow < adjustedCycle.bedTime)) {
-            targetLevel = userTemperatureProfile.initialSleepLevel;
-            sleepStage = "pre-heating";
-          } else if (isNearBedTime || (isNearMidStage && userNow < adjustedCycle.midStageTime)) {
-            targetLevel = userTemperatureProfile.initialSleepLevel;
-            sleepStage = "initial";
-          } else if (isNearMidStage || (isNearFinalStage && userNow < adjustedCycle.finalStageTime)) {
-            targetLevel = userTemperatureProfile.midStageSleepLevel;
-            sleepStage = "mid";
-          } else {
-            targetLevel = userTemperatureProfile.finalSleepLevel;
-            sleepStage = "final";
-          }
-
-          console.log(`Adjusting temperature for ${sleepStage} stage for user ${profile.users.email}`);
-
-          if (!heatingStatus.isHeating) {
-            if (testMode?.enabled) {
-              console.log(`[TEST MODE] Would turn on heating for user ${profile.users.email}`);
-            } else {
-              await retryApiCall(() => turnOnSide(token, profile.users.eightUserId));
-              console.log(`Heating turned on for user ${profile.users.email}`);
-            }
-          }
-          if (heatingStatus.heatingLevel !== targetLevel) {
-            if (testMode?.enabled) {
-              console.log(`[TEST MODE] Would set heating level to ${targetLevel} for user ${profile.users.email}`);
-            } else {
-              await retryApiCall(() => setHeatingLevel(token, profile.users.eightUserId, targetLevel));
-              console.log(`Heating level set to ${targetLevel} for user ${profile.users.email}`);
-            }
-          }
-        } else if (heatingStatus.isHeating && userNow > adjustedCycle.wakeupTime && !isWithinTimeRange(userNow, adjustedCycle.wakeupTime, 15)) {
-          // Only turn off heating if it's more than 15 minutes past wake-up time
+        // Turn on heating if needed
+        if (!heatingStatus.isHeating) {
           if (testMode?.enabled) {
-            console.log(`[TEST MODE] Would turn off heating for user ${profile.users.email}`);
+            console.log(`[TEST MODE] Would turn on heating for user ${profile.users.email}`);
           } else {
-            await retryApiCall(() => turnOffSide(token, profile.users.eightUserId));
-            console.log(`Heating turned off for user ${profile.users.email}`);
+            await retryApiCall(() => turnOnSide(token, profile.users.eightUserId));
+            console.log(`Heating turned on for user ${profile.users.email}`);
           }
-        } else {
-          console.log(`No temperature change needed for user ${profile.users.email}`);
+        }
+
+        // Set temperature if different
+        if (heatingStatus.heatingLevel !== currentTemp) {
+          if (testMode?.enabled) {
+            console.log(`[TEST MODE] Would set heating level to ${currentTemp} for user ${profile.users.email}`);
+          } else {
+            await retryApiCall(() => setHeatingLevel(token, profile.users.eightUserId, currentTemp));
+            console.log(`Heating level set to ${currentTemp} for user ${profile.users.email}`);
+          }
         }
 
         console.log(`Successfully completed temperature adjustment check for user ${profile.users.email}`);
@@ -234,6 +238,19 @@ export async function adjustTemperature(testMode?: TestMode): Promise<void> {
   }
 }
 
+function addHoursToTime(timeStr: string, hours: number): string {
+  const [h, m] = timeStr.split(':').map(Number);
+  const newHour = ((h ?? 0) + hours) % 24;
+  return `${newHour.toString().padStart(2, '0')}:${(m ?? 0).toString().padStart(2, '0')}`;
+}
+
+function subtractHoursFromTime(timeStr: string, hours: number): string {
+  const [h, m] = timeStr.split(':').map(Number);
+  let newHour = (h ?? 0) - hours;
+  if (newHour < 0) newHour += 24;
+  return `${newHour.toString().padStart(2, '0')}:${(m ?? 0).toString().padStart(2, '0')}`;
+}
+
 export async function GET(request: NextRequest): Promise<Response> {
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -242,7 +259,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     try {
       const testTimeParam = request.nextUrl.searchParams.get("testTime");
       if (testTimeParam) {
-        const testTime = new Date(Number(testTimeParam)* 1000);
+        const testTime = new Date(Number(testTimeParam) * 1000);
         if (isNaN(testTime.getTime())) {
           throw new Error("Invalid testTime parameter");
         }
