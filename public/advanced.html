@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,630 +11,624 @@
             box-sizing: border-box;
         }
 
-```
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
-    }
-    
-    .container {
-        max-width: 700px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 16px;
-        padding: 32px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    
-    h1 {
-        color: #1a202c;
-        margin-bottom: 8px;
-        font-size: 28px;
-    }
-    
-    .subtitle {
-        color: #718096;
-        margin-bottom: 24px;
-        font-size: 14px;
-    }
-    
-    .section {
-        margin-bottom: 32px;
-        padding-bottom: 24px;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .section:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-    }
-    
-    h2 {
-        color: #2d3748;
-        margin-bottom: 16px;
-        font-size: 18px;
-    }
-    
-    label {
-        display: block;
-        color: #4a5568;
-        margin-bottom: 6px;
-        font-weight: 500;
-        font-size: 14px;
-    }
-    
-    input, select {
-        width: 100%;
-        padding: 10px 12px;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 14px;
-        margin-bottom: 16px;
-        transition: border-color 0.2s;
-    }
-    
-    input:focus, select:focus {
-        outline: none;
-        border-color: #667eea;
-    }
-    
-    .time-inputs {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-    }
-    
-    .stage-card {
-        background: #f7fafc;
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 16px;
-        position: relative;
-    }
-    
-    .stage-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-    }
-    
-    .stage-title {
-        font-weight: 600;
-        color: #2d3748;
-        font-size: 16px;
-    }
-    
-    .remove-stage {
-        background: #fc8181;
-        color: white;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 600;
-    }
-    
-    .remove-stage:hover {
-        background: #f56565;
-    }
-    
-    .stage-time-input {
-        margin-bottom: 12px;
-    }
-    
-    .temp-slider {
-        width: 100%;
-        margin: 12px 0;
-        -webkit-appearance: none;
-        height: 8px;
-        border-radius: 4px;
-        background: linear-gradient(to right, #3182ce, #805ad5, #e53e3e);
-    }
-    
-    .temp-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: white;
-        border: 3px solid #667eea;
-        cursor: pointer;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-    
-    .temp-value {
-        text-align: center;
-        font-size: 32px;
-        font-weight: bold;
-        margin-top: 8px;
-    }
-    
-    .temp-value .fahrenheit {
-        color: #667eea;
-    }
-    
-    .temp-value .api-value {
-        font-size: 14px;
-        color: #a0aec0;
-        font-weight: normal;
-    }
-    
-    .temp-label {
-        font-size: 12px;
-        color: #718096;
-        margin-top: 4px;
-        text-align: center;
-    }
-    
-    .temp-range-labels {
-        display: flex;
-        justify-content: space-between;
-        font-size: 11px;
-        color: #718096;
-        margin-top: 4px;
-    }
-    
-    button {
-        width: 100%;
-        padding: 14px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        margin-bottom: 12px;
-    }
-    
-    button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-    }
-    
-    button:active {
-        transform: translateY(0);
-    }
-    
-    button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        transform: none;
-    }
-    
-    .add-stage-btn {
-        background: #48bb78;
-    }
-    
-    .add-stage-btn:hover {
-        box-shadow: 0 8px 20px rgba(72, 187, 120, 0.4);
-    }
-    
-    .status {
-        padding: 12px;
-        border-radius: 8px;
-        margin-top: 16px;
-        font-size: 14px;
-        display: none;
-    }
-    
-    .status.success {
-        background: #c6f6d5;
-        color: #22543d;
-        border: 1px solid #9ae6b4;
-    }
-    
-    .status.error {
-        background: #fed7d7;
-        color: #742a2a;
-        border: 1px solid #fc8181;
-    }
-    
-    .status.info {
-        background: #bee3f8;
-        color: #2c5282;
-        border: 1px solid #90cdf4;
-    }
-    
-    .warning {
-        background: #fef5e7;
-        border: 1px solid #f9e79f;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 16px;
-        font-size: 13px;
-        color: #7d6608;
-    }
-    
-    .info-box {
-        background: #ebf8ff;
-        border: 1px solid #90cdf4;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 16px;
-        font-size: 13px;
-        color: #2c5282;
-    }
-    
-    .unit-toggle {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 16px;
-    }
-    
-    .unit-toggle button {
-        flex: 1;
-        padding: 10px;
-        font-size: 14px;
-        margin-bottom: 0;
-    }
-    
-    .unit-toggle button.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    
-    .unit-toggle button:not(.active) {
-        background: #e2e8f0;
-        color: #4a5568;
-    }
-</style>
-```
-
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #1a202c;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        h2 {
+            color: #2d3748;
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+        
+        label {
+            display: block;
+            color: #4a5568;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .stage-card {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        
+        .stage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .stage-title {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 16px;
+        }
+        
+        .remove-stage {
+            background: #fc8181;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .remove-stage:hover {
+            background: #f56565;
+        }
+        
+        .stage-time-input {
+            margin-bottom: 12px;
+        }
+        
+        .temp-slider {
+            width: 100%;
+            margin: 12px 0;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #3182ce, #805ad5, #e53e3e);
+        }
+        
+        .temp-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .temp-value {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        
+        .temp-value .fahrenheit {
+            color: #667eea;
+        }
+        
+        .temp-value .api-value {
+            font-size: 14px;
+            color: #a0aec0;
+            font-weight: normal;
+        }
+        
+        .temp-label {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+            text-align: center;
+        }
+        
+        .temp-range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #718096;
+            margin-top: 4px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 12px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .add-stage-btn {
+            background: #48bb78;
+        }
+        
+        .add-stage-btn:hover {
+            box-shadow: 0 8px 20px rgba(72, 187, 120, 0.4);
+        }
+        
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+        
+        .status.info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+        
+        .warning {
+            background: #fef5e7;
+            border: 1px solid #f9e79f;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #7d6608;
+        }
+        
+        .info-box {
+            background: #ebf8ff;
+            border: 1px solid #90cdf4;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #2c5282;
+        }
+        
+        .unit-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .unit-toggle button {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+        
+        .unit-toggle button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .unit-toggle button:not(.active) {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>🛏️ Eight Sleep Advanced Controller</h1>
         <p class="subtitle">Full control over your temperature schedule with real temperatures</p>
 
-```
-    <div class="warning">
-        ⚠️ This saves your settings to the database. Make sure you've created a profile in the main app first.
-    </div>
-    
-    <div class="section">
-        <h2>Your Eight Sleep Email</h2>
-        <label for="email">Email (must match your profile)</label>
-        <input type="email" id="email" placeholder="your@email.com">
-    </div>
-    
-    <div class="section">
-        <h2>Sleep Schedule</h2>
+        <div class="warning">
+            ⚠️ This saves your settings to the database. Make sure you've created a profile in the main app first.
+        </div>
         
-        <div class="time-inputs">
-            <div>
-                <label for="bedTime">Bed Time</label>
-                <input type="time" id="bedTime" value="22:00">
+        <div class="section">
+            <h2>Your Eight Sleep Email</h2>
+            <label for="email">Email (must match your profile)</label>
+            <input type="email" id="email" placeholder="your@email.com">
+        </div>
+        
+        <div class="section">
+            <h2>Sleep Schedule</h2>
+            
+            <div class="time-inputs">
+                <div>
+                    <label for="bedTime">Bed Time</label>
+                    <input type="time" id="bedTime" value="22:00">
+                </div>
+                <div>
+                    <label for="wakeTime">Wake Time</label>
+                    <input type="time" id="wakeTime" value="06:00">
+                </div>
             </div>
-            <div>
-                <label for="wakeTime">Wake Time</label>
-                <input type="time" id="wakeTime" value="06:00">
+            
+            <label for="side">Your Side of Bed</label>
+            <select id="side">
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+            </select>
+        </div>
+        
+        <div class="section">
+            <h2>Temperature Display</h2>
+            <div class="unit-toggle">
+                <button id="btnFahrenheit" class="active" onclick="setUnit('fahrenheit')">°F (Fahrenheit)</button>
+                <button id="btnLevel" onclick="setUnit('level')">Level (-10 to +10)</button>
             </div>
         </div>
         
-        <label for="side">Your Side of Bed</label>
-        <select id="side">
-            <option value="left">Left</option>
-            <option value="right">Right</option>
-        </select>
-    </div>
-    
-    <div class="section">
-        <h2>Temperature Display</h2>
-        <div class="unit-toggle">
-            <button id="btnFahrenheit" class="active" onclick="setUnit('fahrenheit')">°F (Fahrenheit)</button>
-            <button id="btnLevel" onclick="setUnit('level')">Level (-10 to +10)</button>
-        </div>
-    </div>
-    
-    <div class="section">
-        <h2>Temperature Stages</h2>
-        
-        <div class="info-box">
-            💡 Create as many temperature stages as you want! Each stage starts at a specific time and sets your mattress to that temperature. The slider now shows real temperatures from 55°F (coldest) to 110°F (hottest).
+        <div class="section">
+            <h2>Temperature Stages</h2>
+            
+            <div class="info-box">
+                💡 Create as many temperature stages as you want! Each stage starts at a specific time and sets your mattress to that temperature. The slider now shows real temperatures from 55°F (coldest) to 110°F (hottest).
+            </div>
+            
+            <div id="stagesContainer"></div>
+            
+            <button class="add-stage-btn" onclick="addStage()">+ Add Temperature Stage</button>
         </div>
         
-        <div id="stagesContainer"></div>
+        <div class="section">
+            <h2>Save Settings</h2>
+            <button onclick="saveSchedule()">💾 Save Schedule to Database</button>
+        </div>
         
-        <button class="add-stage-btn" onclick="addStage()">+ Add Temperature Stage</button>
+        <div class="status" id="status"></div>
     </div>
-    
-    <div class="section">
-        <h2>Save Settings</h2>
-        <button onclick="saveSchedule()">💾 Save Schedule to Database</button>
-    </div>
-    
-    <div class="status" id="status"></div>
-</div>
 
-<script>
-    let stages = [];
-    let displayUnit = 'fahrenheit'; // 'fahrenheit' or 'level'
-    
-    // Temperature conversion constants
-    // Eight Sleep API uses -100 to +100
-    // This maps to approximately 55°F to 110°F
-    const MIN_FAHRENHEIT = 55;
-    const MAX_FAHRENHEIT = 110;
-    const MIN_API = -100;
-    const MAX_API = 100;
-    
-    // Convert API value (-100 to +100) to Fahrenheit
-    function apiToFahrenheit(apiValue) {
-        // Map -100..+100 to 55..110
-        const percentage = (apiValue - MIN_API) / (MAX_API - MIN_API);
-        return Math.round(MIN_FAHRENHEIT + percentage * (MAX_FAHRENHEIT - MIN_FAHRENHEIT));
-    }
-    
-    // Convert Fahrenheit to API value (-100 to +100)
-    function fahrenheitToApi(fahrenheit) {
-        // Map 55..110 to -100..+100
-        const percentage = (fahrenheit - MIN_FAHRENHEIT) / (MAX_FAHRENHEIT - MIN_FAHRENHEIT);
-        return Math.round(MIN_API + percentage * (MAX_API - MIN_API));
-    }
-    
-    // Convert API value to display level (-10 to +10)
-    function apiToLevel(apiValue) {
-        return Math.round(apiValue / 10);
-    }
-    
-    // Convert display level (-10 to +10) to API value
-    function levelToApi(level) {
-        return level * 10;
-    }
-    
-    function setUnit(unit) {
-        displayUnit = unit;
-        document.getElementById('btnFahrenheit').classList.toggle('active', unit === 'fahrenheit');
-        document.getElementById('btnLevel').classList.toggle('active', unit === 'level');
-        renderStages();
-        saveToLocalStorage();
-    }
-    
-    // Load saved data from localStorage
-    window.onload = function() {
-        const saved = localStorage.getItem('eightSleepAdvancedDataV2');
-        if (saved) {
-            const data = JSON.parse(saved);
-            document.getElementById('email').value = data.email || '';
-            document.getElementById('bedTime').value = data.bedTime || '22:00';
-            document.getElementById('wakeTime').value = data.wakeTime || '06:00';
-            document.getElementById('side').value = data.side || 'left';
-            displayUnit = data.displayUnit || 'fahrenheit';
-            // Stages now store API values (-100 to +100)
-            stages = data.stages || getDefaultStages();
-        } else {
-            // Try to migrate from old format
-            const oldSaved = localStorage.getItem('eightSleepAdvancedData');
-            if (oldSaved) {
-                const data = JSON.parse(oldSaved);
+    <script>
+        let stages = [];
+        let displayUnit = 'fahrenheit'; // 'fahrenheit' or 'level'
+        
+        // Temperature conversion constants
+        // Eight Sleep API uses -100 to +100
+        // This maps to approximately 55°F to 110°F
+        const MIN_FAHRENHEIT = 55;
+        const MAX_FAHRENHEIT = 110;
+        const MIN_API = -100;
+        const MAX_API = 100;
+        
+        // Convert API value (-100 to +100) to Fahrenheit
+        function apiToFahrenheit(apiValue) {
+            // Map -100..+100 to 55..110
+            const percentage = (apiValue - MIN_API) / (MAX_API - MIN_API);
+            return Math.round(MIN_FAHRENHEIT + percentage * (MAX_FAHRENHEIT - MIN_FAHRENHEIT));
+        }
+        
+        // Convert Fahrenheit to API value (-100 to +100)
+        function fahrenheitToApi(fahrenheit) {
+            // Map 55..110 to -100..+100
+            const percentage = (fahrenheit - MIN_FAHRENHEIT) / (MAX_FAHRENHEIT - MIN_FAHRENHEIT);
+            return Math.round(MIN_API + percentage * (MAX_API - MIN_API));
+        }
+        
+        // Convert API value to display level (-10 to +10)
+        function apiToLevel(apiValue) {
+            return Math.round(apiValue / 10);
+        }
+        
+        // Convert display level (-10 to +10) to API value
+        function levelToApi(level) {
+            return level * 10;
+        }
+        
+        function setUnit(unit) {
+            displayUnit = unit;
+            document.getElementById('btnFahrenheit').classList.toggle('active', unit === 'fahrenheit');
+            document.getElementById('btnLevel').classList.toggle('active', unit === 'level');
+            renderStages();
+            saveToLocalStorage();
+        }
+        
+        // Load saved data from localStorage
+        window.onload = function() {
+            const saved = localStorage.getItem('eightSleepAdvancedDataV2');
+            if (saved) {
+                const data = JSON.parse(saved);
                 document.getElementById('email').value = data.email || '';
                 document.getElementById('bedTime').value = data.bedTime || '22:00';
                 document.getElementById('wakeTime').value = data.wakeTime || '06:00';
                 document.getElementById('side').value = data.side || 'left';
-                // Convert old -10 to +10 values to -100 to +100
-                stages = (data.stages || []).map(s => ({
-                    ...s,
-                    temp: s.temp * 10 // Convert to API scale
-                }));
-                if (stages.length === 0) {
+                displayUnit = data.displayUnit || 'fahrenheit';
+                // Stages now store API values (-100 to +100)
+                stages = data.stages || getDefaultStages();
+            } else {
+                // Try to migrate from old format
+                const oldSaved = localStorage.getItem('eightSleepAdvancedData');
+                if (oldSaved) {
+                    const data = JSON.parse(oldSaved);
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('bedTime').value = data.bedTime || '22:00';
+                    document.getElementById('wakeTime').value = data.wakeTime || '06:00';
+                    document.getElementById('side').value = data.side || 'left';
+                    // Convert old -10 to +10 values to -100 to +100
+                    stages = (data.stages || []).map(s => ({
+                        ...s,
+                        temp: s.temp * 10 // Convert to API scale
+                    }));
+                    if (stages.length === 0) {
+                        stages = getDefaultStages();
+                    }
+                } else {
                     stages = getDefaultStages();
                 }
-            } else {
-                stages = getDefaultStages();
             }
+            
+            document.getElementById('btnFahrenheit').classList.toggle('active', displayUnit === 'fahrenheit');
+            document.getElementById('btnLevel').classList.toggle('active', displayUnit === 'level');
+            
+            renderStages();
+        };
+        
+        function getDefaultStages() {
+            // Default stages with API values (-100 to +100)
+            return [
+                { time: '22:00', temp: -30, name: 'Initial Sleep' },   // ~72°F
+                { time: '23:00', temp: -40, name: 'Deep Sleep' },      // ~69°F
+                { time: '04:00', temp: -20, name: 'Pre-Wake' }         // ~75°F
+            ];
         }
         
-        document.getElementById('btnFahrenheit').classList.toggle('active', displayUnit === 'fahrenheit');
-        document.getElementById('btnLevel').classList.toggle('active', displayUnit === 'level');
-        
-        renderStages();
-    };
-    
-    function getDefaultStages() {
-        // Default stages with API values (-100 to +100)
-        return [
-            { time: '22:00', temp: -30, name: 'Initial Sleep' },   // ~72°F
-            { time: '23:00', temp: -40, name: 'Deep Sleep' },      // ~69°F
-            { time: '04:00', temp: -20, name: 'Pre-Wake' }         // ~75°F
-        ];
-    }
-    
-    function renderStages() {
-        const container = document.getElementById('stagesContainer');
-        container.innerHTML = '';
-        
-        stages.forEach((stage, index) => {
-            const stageDiv = document.createElement('div');
-            stageDiv.className = 'stage-card';
+        function renderStages() {
+            const container = document.getElementById('stagesContainer');
+            container.innerHTML = '';
             
-            let sliderMin, sliderMax, sliderValue, displayValue, displayLabel;
-            
-            if (displayUnit === 'fahrenheit') {
-                sliderMin = MIN_FAHRENHEIT;
-                sliderMax = MAX_FAHRENHEIT;
-                sliderValue = apiToFahrenheit(stage.temp);
-                displayValue = `<span class="fahrenheit">${sliderValue}°F</span>`;
-                displayLabel = `<span class="api-value">(Level: ${apiToLevel(stage.temp)})</span>`;
-            } else {
-                sliderMin = -10;
-                sliderMax = 10;
-                sliderValue = apiToLevel(stage.temp);
-                displayValue = `<span class="fahrenheit">${sliderValue}</span>`;
-                displayLabel = `<span class="api-value">(~${apiToFahrenheit(stage.temp)}°F)</span>`;
-            }
-            
-            stageDiv.innerHTML = `
-                <div class="stage-header">
-                    <input type="text" class="stage-title" value="${stage.name}" 
-                           onchange="updateStageName(${index}, this.value)" 
-                           placeholder="Stage name"
-                           style="border: none; background: transparent; font-weight: 600; font-size: 16px; width: 70%; padding: 0;">
-                    ${stages.length > 1 ? `<button class="remove-stage" onclick="removeStage(${index})">Remove</button>` : ''}
-                </div>
+            stages.forEach((stage, index) => {
+                const stageDiv = document.createElement('div');
+                stageDiv.className = 'stage-card';
                 
-                <div class="stage-time-input">
-                    <label>Start Time</label>
-                    <input type="time" value="${stage.time}" onchange="updateStageTime(${index}, this.value)">
-                </div>
+                let sliderMin, sliderMax, sliderValue, displayValue, displayLabel;
                 
-                <label>Temperature</label>
-                <input type="range" class="temp-slider" min="${sliderMin}" max="${sliderMax}" value="${sliderValue}" 
-                       oninput="updateStageTemp(${index}, this.value)">
-                <div class="temp-range-labels">
-                    <span>${displayUnit === 'fahrenheit' ? '55°F (Coldest)' : '-10 (Coldest)'}</span>
-                    <span>${displayUnit === 'fahrenheit' ? '110°F (Hottest)' : '+10 (Hottest)'}</span>
-                </div>
-                <div class="temp-value" id="tempValue${index}">${displayValue}<br>${displayLabel}</div>
-            `;
-            container.appendChild(stageDiv);
-        });
-    }
-    
-    function addStage() {
-        const lastStage = stages[stages.length - 1];
-        const lastTime = lastStage.time.split(':');
-        let newHour = parseInt(lastTime[0]) + 1;
-        if (newHour >= 24) newHour = 0;
-        const newTime = `${newHour.toString().padStart(2, '0')}:00`;
+                if (displayUnit === 'fahrenheit') {
+                    sliderMin = MIN_FAHRENHEIT;
+                    sliderMax = MAX_FAHRENHEIT;
+                    sliderValue = apiToFahrenheit(stage.temp);
+                    displayValue = `<span class="fahrenheit">${sliderValue}°F</span>`;
+                    displayLabel = `<span class="api-value">(Level: ${apiToLevel(stage.temp)})</span>`;
+                } else {
+                    sliderMin = -10;
+                    sliderMax = 10;
+                    sliderValue = apiToLevel(stage.temp);
+                    displayValue = `<span class="fahrenheit">${sliderValue}</span>`;
+                    displayLabel = `<span class="api-value">(~${apiToFahrenheit(stage.temp)}°F)</span>`;
+                }
+                
+                stageDiv.innerHTML = `
+                    <div class="stage-header">
+                        <input type="text" class="stage-title" value="${stage.name}" 
+                               onchange="updateStageName(${index}, this.value)" 
+                               placeholder="Stage name"
+                               style="border: none; background: transparent; font-weight: 600; font-size: 16px; width: 70%; padding: 0;">
+                        ${stages.length > 1 ? `<button class="remove-stage" onclick="removeStage(${index})">Remove</button>` : ''}
+                    </div>
+                    
+                    <div class="stage-time-input">
+                        <label>Start Time</label>
+                        <input type="time" value="${stage.time}" onchange="updateStageTime(${index}, this.value)">
+                    </div>
+                    
+                    <label>Temperature</label>
+                    <input type="range" class="temp-slider" min="${sliderMin}" max="${sliderMax}" value="${sliderValue}" 
+                           oninput="updateStageTemp(${index}, this.value)">
+                    <div class="temp-range-labels">
+                        <span>${displayUnit === 'fahrenheit' ? '55°F (Coldest)' : '-10 (Coldest)'}</span>
+                        <span>${displayUnit === 'fahrenheit' ? '110°F (Hottest)' : '+10 (Hottest)'}</span>
+                    </div>
+                    <div class="temp-value" id="tempValue${index}">${displayValue}<br>${displayLabel}</div>
+                `;
+                container.appendChild(stageDiv);
+            });
+        }
         
-        stages.push({
-            time: newTime,
-            temp: 0, // API value: 0 = ~82°F (middle)
-            name: `Stage ${stages.length + 1}`
-        });
-        
-        renderStages();
-        saveToLocalStorage();
-    }
-    
-    function removeStage(index) {
-        if (stages.length > 1) {
-            stages.splice(index, 1);
+        function addStage() {
+            const lastStage = stages[stages.length - 1];
+            const lastTime = lastStage.time.split(':');
+            let newHour = parseInt(lastTime[0]) + 1;
+            if (newHour >= 24) newHour = 0;
+            const newTime = `${newHour.toString().padStart(2, '0')}:00`;
+            
+            stages.push({
+                time: newTime,
+                temp: 0, // API value: 0 = ~82°F (middle)
+                name: `Stage ${stages.length + 1}`
+            });
+            
             renderStages();
             saveToLocalStorage();
         }
-    }
-    
-    function updateStageName(index, name) {
-        stages[index].name = name;
-        saveToLocalStorage();
-    }
-    
-    function updateStageTime(index, time) {
-        stages[index].time = time;
-        saveToLocalStorage();
-    }
-    
-    function updateStageTemp(index, value) {
-        const intValue = parseInt(value);
         
-        // Convert to API value based on display unit
-        if (displayUnit === 'fahrenheit') {
-            stages[index].temp = fahrenheitToApi(intValue);
-        } else {
-            stages[index].temp = levelToApi(intValue);
-        }
-        
-        // Update display
-        const tempValueEl = document.getElementById(`tempValue${index}`);
-        if (displayUnit === 'fahrenheit') {
-            const fahrenheit = intValue;
-            const level = apiToLevel(stages[index].temp);
-            tempValueEl.innerHTML = `<span class="fahrenheit">${fahrenheit}°F</span><br><span class="api-value">(Level: ${level})</span>`;
-        } else {
-            const level = intValue;
-            const fahrenheit = apiToFahrenheit(stages[index].temp);
-            tempValueEl.innerHTML = `<span class="fahrenheit">${level}</span><br><span class="api-value">(~${fahrenheit}°F)</span>`;
-        }
-        
-        saveToLocalStorage();
-    }
-    
-    function saveToLocalStorage() {
-        const data = {
-            email: document.getElementById('email').value,
-            bedTime: document.getElementById('bedTime').value,
-            wakeTime: document.getElementById('wakeTime').value,
-            side: document.getElementById('side').value,
-            displayUnit: displayUnit,
-            stages: stages
-        };
-        localStorage.setItem('eightSleepAdvancedDataV2', JSON.stringify(data));
-    }
-    
-    function showStatus(message, type) {
-        const status = document.getElementById('status');
-        status.textContent = message;
-        status.className = 'status ' + type;
-        status.style.display = 'block';
-        
-        if (type !== 'info') {
-            setTimeout(() => {
-                status.style.display = 'none';
-            }, 5000);
-        }
-    }
-    
-    async function saveSchedule() {
-        const email = document.getElementById('email').value;
-        const bedTime = document.getElementById('bedTime').value;
-        const wakeTime = document.getElementById('wakeTime').value;
-        const side = document.getElementById('side').value;
-        
-        if (!email) {
-            showStatus('Please enter your email', 'error');
-            return;
-        }
-        
-        // Prepare stages for API - temp values are already in API format (-100 to +100)
-        const apiStages = stages.map(s => ({
-            time: s.time,
-            temp: s.temp,
-            name: s.name
-        }));
-        
-        const data = {
-            email: email,
-            bedTime: bedTime,
-            wakeTime: wakeTime,
-            side: side,
-            stages: apiStages
-        };
-        
-        // Save to localStorage
-        saveToLocalStorage();
-        
-        // Save to database
-        showStatus('Saving to database...', 'info');
-        
-        try {
-            const response = await fetch('/api/saveStages', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                showStatus('✓ Schedule saved successfully! Your cron job will use these settings.', 'success');
-            } else {
-                showStatus('Error: ' + result.error, 'error');
+        function removeStage(index) {
+            if (stages.length > 1) {
+                stages.splice(index, 1);
+                renderStages();
+                saveToLocalStorage();
             }
-        } catch (error) {
-            showStatus('Failed to save: ' + error.message, 'error');
         }
-    }
-</script>
-```
-
+        
+        function updateStageName(index, name) {
+            stages[index].name = name;
+            saveToLocalStorage();
+        }
+        
+        function updateStageTime(index, time) {
+            stages[index].time = time;
+            saveToLocalStorage();
+        }
+        
+        function updateStageTemp(index, value) {
+            const intValue = parseInt(value);
+            
+            // Convert to API value based on display unit
+            if (displayUnit === 'fahrenheit') {
+                stages[index].temp = fahrenheitToApi(intValue);
+            } else {
+                stages[index].temp = levelToApi(intValue);
+            }
+            
+            // Update display
+            const tempValueEl = document.getElementById(`tempValue${index}`);
+            if (displayUnit === 'fahrenheit') {
+                const fahrenheit = intValue;
+                const level = apiToLevel(stages[index].temp);
+                tempValueEl.innerHTML = `<span class="fahrenheit">${fahrenheit}°F</span><br><span class="api-value">(Level: ${level})</span>`;
+            } else {
+                const level = intValue;
+                const fahrenheit = apiToFahrenheit(stages[index].temp);
+                tempValueEl.innerHTML = `<span class="fahrenheit">${level}</span><br><span class="api-value">(~${fahrenheit}°F)</span>`;
+            }
+            
+            saveToLocalStorage();
+        }
+        
+        function saveToLocalStorage() {
+            const data = {
+                email: document.getElementById('email').value,
+                bedTime: document.getElementById('bedTime').value,
+                wakeTime: document.getElementById('wakeTime').value,
+                side: document.getElementById('side').value,
+                displayUnit: displayUnit,
+                stages: stages
+            };
+            localStorage.setItem('eightSleepAdvancedDataV2', JSON.stringify(data));
+        }
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            status.style.display = 'block';
+            
+            if (type !== 'info') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        async function saveSchedule() {
+            const email = document.getElementById('email').value;
+            const bedTime = document.getElementById('bedTime').value;
+            const wakeTime = document.getElementById('wakeTime').value;
+            const side = document.getElementById('side').value;
+            
+            if (!email) {
+                showStatus('Please enter your email', 'error');
+                return;
+            }
+            
+            // Prepare stages for API - temp values are already in API format (-100 to +100)
+            const apiStages = stages.map(s => ({
+                time: s.time,
+                temp: s.temp,
+                name: s.name
+            }));
+            
+            const data = {
+                email: email,
+                bedTime: bedTime,
+                wakeTime: wakeTime,
+                side: side,
+                stages: apiStages
+            };
+            
+            // Save to localStorage
+            saveToLocalStorage();
+            
+            // Save to database
+            showStatus('Saving to database...', 'info');
+            
+            try {
+                const response = await fetch('/api/saveStages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('✓ Schedule saved successfully! Your cron job will use these settings.', 'success');
+                } else {
+                    showStatus('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Failed to save: ' + error.message, 'error');
+            }
+        }
+    </script>
 </body>
 </html>
