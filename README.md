@@ -4,7 +4,7 @@ This WebApp is an alternative interface to control any Eight Sleep mattress. It 
 
 <img src="eightsleep-nosub-app.png" alt="Eight Sleep No-Subscription App" width="500">
 
-## How to use this app yourself
+## How to use  this app yourself
 
 In the following, I will explain how to self-host this webapp on Vercel so that you can control it from anywhere. The setup will not generate any costs. It should take about 15 minutes to complete, **no coding skills required**.
 
